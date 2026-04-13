@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Jakarta Dakar</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --saffron: #F5A623;
+    --deep: #0D1117;
+    --surface: #161B22;
+    --card: #1E2530;
+    --accent: #FF6B35;
+    --green: #2ECC71;
+    --text: #E8EAF0;
+    --muted: #6B7280;
+    --border: rgba(255,255,255,0.07);
+    --red: #FF3B30;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'DM Sans', sans-serif;
+    overflow: hidden;
+  }
+
+  .phone {
+    width: 390px;
+    height: 844px;
+    background: var(--deep);
+    border-radius: 52px;
+    border: 2px solid rgba(255,255,255,0.1);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 40px 120px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    transform: translateX(20px);
+  }
+  .screen.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(0);
+  }
+  .screen.slide-left {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+
+  /* ─── SPLASH ─── */
+  #splash {
+    background: var(--deep);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+  }
+  .splash-logo {
+    width: 90px; height: 90px;
+    background: linear-gradient(135deg, var(--saffron), var(--accent));
+    border-radius: 28px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 42px;
+    box-shadow: 0 20px 60px rgba(245,166,35,0.4);
+    animation: logoPulse 2.5s ease infinite;
+  }
+  @keyframes logoPulse {
+    0%,100% { box-shadow: 0 20px 60px rgba(245,166,35,0.4); transform: scale(1); }
+    50% { box-shadow: 0 24px 80px rgba(245,166,35,0.7); transform: scale(1.04); }
+  }
+  .splash-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px; font-weight: 800;
+    color: var(--text);
+    letter-spacing: -1px;
+  }
+  .splash-title span { color: var(--saffron); }
+  .splash-sub {
+    color: var(--muted); font-size: 15px; text-align: center;
+    line-height: 1.5; max-width: 260px;
+  }
+  .splash-btn {
+    margin-top: 20px;
+    background: linear-gradient(135deg, var(--saffron), var(--accent));
+    color: white; border: none;
+    padding: 18px 60px; border-radius: 50px;
+    font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700;
+    cursor: pointer; letter-spacing: 0.5px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 8px 30px rgba(245,166,35,0.3);
+  }
+  .splash-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(245,166,35,0.5); }
+  .splash-btn:active { transform: scale(0.97); }
+
+  /* ─── HOME ─── */
+  #home {
+    background: var(--deep);
+    display: flex; flex-direction: column;
+  }
+  .map-area {
+    height: 420px;
+    background: #111827;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .map-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(245,166,35,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,166,35,0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .road { position: absolute; background: rgba(255,255,255,0.08); border-radius: 4px; }
+  .road.h { height: 6px; }
+  .road.v { width: 6px; }
+  .moto-dot {
+    position: absolute;
+    width: 32px; height: 32px;
+    background: rgba(245,166,35,0.15);
+    border: 2px solid var(--saffron);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    animation: floatMoto 3s ease-in-out infinite;
+  }
+  .moto-dot::after {
+    content: '';
+    position: absolute;
+    width: 8px; height: 8px;
+    background: var(--saffron);
+    border-radius: 50%;
+  }
+  @keyframes floatMoto {
+    0%,100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-7px) scale(1.05); }
+  }
+  .moto-dot:nth-child(2) { animation-delay: 0.8s; }
+  .moto-dot:nth-child(3) { animation-delay: 1.6s; }
+
+  .user-pin {
+    position: absolute;
+    bottom: 140px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center;
+    z-index: 10;
+  }
+  .pin-icon {
+    width: 46px; height: 46px;
+    background: linear-gradient(135deg, var(--saffron), var(--accent));
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 24px rgba(245,166,35,0.5);
+    animation: pinBounce 2s ease infinite;
+  }
+  @keyframes pinBounce {
+    0%,100% { transform: rotate(-45deg) translateY(0); }
+    50% { transform: rotate(-45deg) translateY(-7px); }
+  }
+  .pin-icon span { transform: rotate(45deg); font-size: 18px; }
+  .pin-shadow {
+    width: 16px; height: 6px;
+    background: rgba(245,166,35,0.3);
+    border-radius: 50%;
+    margin-top: 4px;
+    filter: blur(2px);
+    animation: shadowPulse 2s ease infinite;
+  }
+  @keyframes shadowPulse {
+    0%,100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(0.7); opacity: 0.15; }
+  }
+
+  .map-topbar {
+    position: absolute; top: 0; left: 0; right: 0;
+    padding: 54px 20px 16px;
+    background: linear-gradient(to bottom, rgba(13,17,23,0.95), transparent);
+    display: flex; align-items: center; justify-content: space-between;
+    z-index: 20;
+  }
+  .greeting { font-family: 'Syne', sans-serif; }
+  .greeting-sub { color: var(--muted); font-size: 12px; }
+  .greeting-name { color: var(--text); font-size: 18px; font-weight: 700; }
+  .greeting-name span { color: var(--saffron); }
+  .notif-btn {
+    width: 40px; height: 40px;
+    background: var(--card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; cursor: pointer;
+    position: relative;
+    transition: background 0.2s;
+  }
+  .notif-btn:hover { background: rgba(245,166,35,0.1); }
+  .notif-badge {
+    position: absolute; top: 6px; right: 6px;
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    border: 2px solid var(--deep);
+    animation: badgePulse 2s ease infinite;
+  }
+  @keyframes badgePulse {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+  }
+
+  .bottom-sheet {
+    flex: 1;
+    background: var(--surface);
+    border-radius: 28px 28px 0 0;
+    margin-top: -28px;
+    padding: 20px 20px 0;
+    position: relative;
+    z-index: 10;
+    overflow-y: auto;
+  }
+  .sheet-handle {
+    width: 40px; height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+  .where-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 16px;
+    display: flex; align-items: center; gap: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    margin-bottom: 16px;
+  }
+  .where-card:hover { border-color: var(--saffron); background: rgba(245,166,35,0.05); }
+  .where-card:active { transform: scale(0.98); }
+  .where-icon {
+    width: 40px; height: 40px;
+    background: rgba(245,166,35,0.15);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .where-text { flex: 1; }
+  .where-label { color: var(--muted); font-size: 12px; }
+  .where-placeholder { color: var(--text); font-size: 15px; font-weight: 500; }
+  .where-arrow { color: var(--muted); font-size: 20px; }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px; font-weight: 700;
+    color: var(--text); margin-bottom: 14px;
+  }
+  .quick-actions {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 10px; margin-bottom: 20px;
+  }
+  .quick-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .quick-btn:active { transform: scale(0.9); }
+  .quick-icon {
+    width: 54px; height: 54px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .quick-btn:hover .quick-icon { background: rgba(245,166,35,0.1); border-color: var(--saffron); }
+  .quick-label { color: var(--muted); font-size: 11px; text-align: center; }
+
+  .nearby-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .nearby-card:hover { border-color: var(--saffron); }
+  .nearby-card:active { transform: scale(0.98); }
+  .driver-avatar {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, #2a3a5c, #1a2a4c);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    border: 2px solid var(--saffron);
+    flex-shrink: 0;
+  }
+  .driver-info { flex: 1; }
+  .driver-name { color: var(--text); font-size: 14px; font-weight: 600; }
+  .driver-meta { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .driver-distance {
+    background: rgba(46,204,113,0.15);
+    color: var(--green);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px; font-weight: 600;
+  }
+
+  /* ─── BOOKING ─── */
+  #booking {
+    background: var(--deep);
+    display: flex; flex-direction: column;
+  }
+  .booking-header {
+    padding: 54px 20px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .back-btn {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--muted); font-size: 14px;
+    cursor: pointer; margin-bottom: 20px;
+    width: fit-content;
+    transition: color 0.2s;
+  }
+  .back-btn:hover { color: var(--saffron); }
+  .booking-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px; font-weight: 800;
+    color: var(--text);
+  }
+  .route-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    margin: 16px 20px;
+    padding: 18px;
+  }
+  .route-point { display: flex; align-items: center; gap: 14px; padding: 10px 0; }
+  .route-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+  .route-dot.start { background: var(--saffron); box-shadow: 0 0 12px rgba(245,166,35,0.5); }
+  .route-dot.end { background: var(--accent); box-shadow: 0 0 12px rgba(255,107,53,0.5); }
+  .route-line-container { display: flex; align-items: center; padding: 0; position: relative; height: 20px; }
+  .route-line {
+    position: absolute; left: 6px; top: 0; bottom: 0; width: 2px;
+    background: repeating-linear-gradient(to bottom, var(--muted) 0, var(--muted) 6px, transparent 6px, transparent 12px);
+  }
+  .route-input {
+    background: none; border: none; outline: none;
+    color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: 15px; width: 100%; cursor: pointer;
+  }
+  .route-input::placeholder { color: var(--muted); }
+  .ride-options { padding: 0 20px 16px; flex: 1; overflow-y: auto; }
+  .ride-option {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .ride-option.selected { border-color: var(--saffron); background: rgba(245,166,35,0.05); }
+  .ride-option:hover { border-color: rgba(245,166,35,0.5); }
+  .ride-option:active { transform: scale(0.98); }
+  .ride-emoji { font-size: 32px; }
+  .ride-details { flex: 1; }
+  .ride-name { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); }
+  .ride-desc { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .ride-time { color: var(--green); font-size: 12px; margin-top: 2px; }
+  .ride-price { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--saffron); text-align: right; }
+  .ride-price-sub { color: var(--muted); font-size: 11px; }
+  .payment-bar {
+    padding: 16px 20px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .payment-method {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    border-radius: 12px;
+    flex: 1; cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .payment-method:hover { border-color: var(--saffron); }
+  .payment-icon { font-size: 18px; }
+  .payment-name { color: var(--text); font-size: 13px; font-weight: 500; }
+  .book-btn {
+    background: linear-gradient(135deg, var(--saffron), var(--accent));
+    color: white; border: none;
+    padding: 14px 28px; border-radius: 14px;
+    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(245,166,35,0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .book-btn:hover { transform: scale(1.03); box-shadow: 0 10px 30px rgba(245,166,35,0.5); }
+  .book-btn:active { transform: scale(0.97); }
+
+  /* ─── TRACKING ─── */
+  #tracking {
+    background: var(--deep);
+    display: flex; flex-direction: column;
+  }
+  .tracking-map {
+    height: 380px;
+    background: #0f1520;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .tracking-map .map-grid { opacity: 0.5; }
+  .route-path {
+    position: absolute;
+    bottom: 120px; left: 60px; right: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--saffron), var(--accent));
+    border-radius: 2px;
+    box-shadow: 0 0 20px rgba(245,166,35,0.4);
+  }
+  .moving-moto {
+    position: absolute;
+    bottom: 106px; left: 60px;
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--saffron), var(--accent));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 0 20px rgba(245,166,35,0.5);
+    animation: moveAlongPath 4s linear infinite;
+  }
+  @keyframes moveAlongPath {
+    0% { left: 60px; }
+    100% { left: calc(100% - 96px); }
+  }
+  .dest-pin {
+    position: absolute;
+    bottom: 100px; right: 60px;
+    font-size: 28px;
+    filter: drop-shadow(0 4px 12px rgba(255,107,53,0.5));
+  }
+  .tracking-info {
+    flex: 1;
+    background: var(--surface);
+    border-radius: 28px 28px 0 0;
+    margin-top: -28px;
+    padding: 20px;
+    z-index: 10;
+    overflow-y: auto;
+  }
+  .eta-badge {
+    background: linear-gradient(135deg, rgba(245,166,35,0.2), rgba(255,107,53,0.1));
+    border: 1px solid rgba(245,166,35,0.3);
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .eta-label { color: var(--muted); font-size: 12px; }
+  .eta-time { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--saffron); }
+  .eta-sub { color: var(--muted); font-size: 12px; }
+  .eta-status { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .status-dot {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--green); font-size: 13px; font-weight: 600;
+  }
+  .status-dot::before {
+    content: '';
+    width: 8px; height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: blink 1.5s ease infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .driver-card-tracking {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 16px;
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 16px;
+  }
+  .driver-avatar-lg {
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, #2a3a5c, #1a2a4c);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    border: 2px solid var(--saffron);
+    flex-shrink: 0;
+  }
+  .driver-info-lg { flex: 1; }
+  .driver-name-lg { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); }
+  .driver-plate { color: var(--saffron); font-size: 13px; font-weight: 600; margin-top: 2px; }
+  .driver-rating { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .contact-btns { display: flex; gap: 8px; }
+  .contact-btn {
+    width: 42px; height: 42px;
+    background: rgba(245,166,35,0.1);
+    border: 1px solid rgba(245,166,35,0.3);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .contact-btn:hover { background: rgba(245,166,35,0.2); }
+  .contact-btn:active { transform: scale(0.9); }
+  .cancel-btn {
+    width: 100%;
+    background: rgba(255,59,48,0.1);
+    border: 1px solid rgba(255,59,48,0.3);
+    color: var(--red);
+    padding: 14px;
+    border-radius: 14px;
+    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .cancel-btn:hover { background: rgba(255,59,48,0.2); }
+
+  /* ─── NOTATION ─── */
+  #rating {
+    background: var(--deep);
+    display: flex; flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 60px 24px 24px;
+    overflow-y: auto;
+  }
+  .rating-checkmark {
+    width: 70px; height: 70px;
+    background: linear-gradient(135deg, var(--green), #27ae60);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    margin-bottom: 20px;
+    box-shadow: 0 12px 40px rgba(46,204,113,0.4);
+    animation: checkIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  }
+  @keyframes checkIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .rating-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px; font-weight: 800;
+    color: var(--text); margin-bottom: 6px;
+    text-align: center;
+  }
+  .rating-sub {
+    color: var(--muted); font-size: 14px;
+    text-align: center; margin-bottom: 28px;
+  }
+  .rating-summary {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 16px 20px;
+    width: 100%;
+    display: flex; justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .rating-stat { text-align: center; }
+  .rating-stat-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px; font-weight: 800;
+    color: var(--saffron);
+  }
+  .rating-stat-label { color: var(--muted); font-size: 11px; margin-top: 2px; }
+
+  .rating-driver-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px;
+    width: 100%;
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 24px;
+  }
+  .rating-driver-avatar {
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, #2a3a5c, #1a2a4c);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    border: 2px solid var(--saffron);
+  }
+  .rating-driver-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px; font-weight: 700; color: var(--text);
+  }
+  .rating-driver-sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+  .stars-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px; font-weight: 700;
+    color: var(--text); margin-bottom: 14px;
+    text-align: center;
+  }
+  .stars-picker {
+    display: flex; gap: 12px; margin-bottom: 24px;
+  }
+  .star-btn {
+    font-size: 38px; cursor: pointer;
+    transition: transform 0.2s;
+    filter: grayscale(1) opacity(0.4);
+  }
+  .star-btn.active {
+    filter: none;
+    animation: starPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes starPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.4); }
+    100% { transform: scale(1); }
+  }
+
+  .tags-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px; font-weight: 700;
+    color: var(--text); margin-bottom: 12px;
+    align-self: flex-start;
+  }
+  .tags-grid {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    width: 100%; margin-bottom: 24px;
+  }
+  .tag {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    padding: 8px 16px;
+    color: var(--muted); font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tag.active { background: rgba(245,166,35,0.15); border-color: var(--saffron); color: var(--saffron); }
+  .tag:active { transform: scale(0.95); }
+
+  .rating-comment {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    resize: none;
+    height: 80px;
+    outline: none;
+    margin-bottom: 20px;
+    transition: border-color 0.2s;
+  }
+  .rating-comment:focus { border-color: var(--saffron); }
+  .rating-comment::placeholder { color: var(--muted); }
+  .submit-rating-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--saffron), var(--accent));
+    color: white; border: none;
+    padding: 16px; border-radius: 16px;
+    font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(245,166,35,0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .submit-rating-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(245,166,35,0.5); }
+  .submit-rating-btn:active { transform: scale(0.97); }
+
+  /* ─── HISTORIQUE ─── */
+  #history {
+    background: var(--deep);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .history-header {
+    padding: 54px 20px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .history-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px; font-weight: 800;
+    color: var(--text); margin-bottom: 14px;
+  }
+  .history-tabs {
+    display: flex; gap: 8px;
+  }
+  .history-tab {
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    background: var(--card);
+    transition: all 0.2s;
+  }
+  .history-tab.active {
+    background: rgba(245,166,35,0.15);
+    border-color: var(--saffron);
+    color: var(--saffron);
+  }
+  .history-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px 80px;
+  }
+  .history-month {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px; font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px; margin-top: 6px;
+  }
+  .history-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+    animation: slideUp 0.4s ease both;
+  }
+  .history-item:hover { border-color: rgba(245,166,35,0.4); }
+  .history-item:active { transform: scale(0.98); }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .history-item:nth-child(1) { animation-delay: 0.05s; }
+  .history-item:nth-child(2) { animation-delay: 0.1s; }
+  .history-item:nth-child(3) { animation-delay: 0.15s; }
+  .history-item:nth-child(4) { animation-delay: 0.2s; }
+  .history-item:nth-child(5) { animation-delay: 0.25s; }
+  .history-row1 {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px;
+  }
+  .history-driver-row {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .history-avatar {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, #2a3a5c, #1a2a4c);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    border: 1.5px solid var(--saffron);
+  }
+  .history-driver-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .history-driver-date { font-size: 11px; color: var(--muted); }
+  .history-price {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px; font-weight: 800;
+    color: var(--saffron);
+  }
+  .history-route {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 0;
+    border-top: 1px solid var(--border);
+  }
+  .history-route-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .history-route-dot.s { background: var(--saffron); }
+  .history-route-dot.e { background: var(--accent); }
+  .history-route-line { width: 1px; height: 16px; background: var(--border); margin: 0 3.5px; }
+  .history-route-texts { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .history-route-text { font-size: 12px; color: var(--muted); }
+  .history-route-meta {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .history-badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+  }
+  .history-badge.completed { background: rgba(46,204,113,0.15); color: var(--green); }
+  .history-badge.cancelled { background: rgba(255,59,48,0.15); color: var(--red); }
+  .history-stars { color: #FFD700; font-size: 11px; letter-spacing: 1px; }
+
+  /* ─── PROFIL ─── */
+  #profile {
+    background: var(--deep);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .profile-header {
+    background: linear-gradient(160deg, var(--surface) 60%, rgba(245,166,35,0.08));
+    padding: 54px 20px 24px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .profile-top {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 20px;
+  }
+  .profile-avatar {
+    width: 72px; height: 72px;
+    background: linear-gradient(135deg, var(--saffron), var(--accent));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 34px;
+    box-shadow: 0 8px 24px rgba(245,166,35,0.4);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .profile-edit-badge {
+    position: absolute; bottom: 0; right: 0;
+    width: 22px; height: 22px;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; cursor: pointer;
+  }
+  .profile-info { flex: 1; }
+  .profile-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px; font-weight: 800;
+    color: var(--text);
+  }
+  .profile-phone { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .profile-badge {
+    background: rgba(245,166,35,0.15);
+    border: 1px solid rgba(245,166,35,0.3);
+    color: var(--saffron);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px; font-weight: 700;
+    margin-top: 6px;
+    display: inline-block;
+  }
+  .profile-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .profile-stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px;
+    text-align: center;
+  }
+  .profile-stat-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px; font-weight: 800;
+    color: var(--saffron);
+  }
+  .profile-stat-label { color: var(--muted); font-size: 11px; margin-top: 2px; }
+
+  .profile-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px 80px;
+  }
+  .profile-section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+    margin-top: 20px;
+  }
+  .profile-menu-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 18px;
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .profile-menu-item:hover { border-color: rgba(245,166,35,0.3); }
+  .profile-menu-item:active { transform: scale(0.98); }
+  .profile-menu-icon {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .icon-orange { background: rgba(245,166,35,0.15); }
+  .icon-blue { background: rgba(52,152,219,0.15); }
+  .icon-green { background: rgba(46,204,113,0.15); }
+  .icon-purple { background: rgba(155,89,182,0.15); }
+  .icon-red { background: rgba(255,59,48,0.15); }
+  .profile-menu-text { flex: 1; }
+  .profile-menu-label { color: var(--text); font-size: 14px; font-weight: 600; }
+  .profile-menu-sub { color: var(--muted); font-size: 12px; margin-top: 1px; }
+  .profile-menu-arrow { color: var(--muted); font-size: 18px; }
+  .profile-menu-badge {
+    background: rgba(245,166,35,0.15);
+    color: var(--saffron);
+    font-size: 11px; font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+
+  .logout-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid rgba(255,59,48,0.3);
+    color: var(--red);
+    padding: 14px;
+    border-radius: 14px;
+    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s;
+  }
+  .logout-btn:hover { background: rgba(255,59,48,0.1); }
+
+  /* ─── NAV BAR ─── */
+  .nav-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 80px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-around;
+    padding-bottom: 10px;
+    z-index: 100;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    cursor: pointer; padding: 6px 16px;
+    transition: transform 0.2s;
+  }
+  .nav-item:active { transform: scale(0.85); }
+  .nav-icon { font-size: 22px; transition: transform 0.2s; }
+  .nav-label { font-size: 10px; color: var(--muted); transition: color 0.2s; }
+  .nav-item.active .nav-label { color: var(--saffron); }
+  .nav-item.active .nav-icon { transform: scale(1.2); }
+
+  /* Road coords */
+  .r1 { top: 30%; left: 0; right: 0; }
+  .r2 { top: 55%; left: 0; right: 0; }
+  .r3 { top: 75%; left: 0; right: 0; }
+  .r4 { left: 20%; top: 0; bottom: 0; }
+  .r5 { left: 50%; top: 0; bottom: 0; }
+  .r6 { left: 75%; top: 0; bottom: 0; }
+  .m1 { top: 28%; left: 15%; animation-delay: 0s; }
+  .m2 { top: 52%; left: 55%; animation-delay: 1s; }
+  .m3 { top: 20%; left: 70%; animation-delay: 2s; }
+
+  .stars { color: #FFD700; font-size: 13px; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- ════ SPLASH ════ -->
+  <div id="splash" class="screen active">
+    <div class="splash-logo">🛵</div>
+    <div>
+      <div class="splash-title">Jakarta<span>DK</span></div>
+    </div>
+    <div class="splash-sub">Tes motos-taxis à Dakar, en un seul tap. Rapide, sûr, abordable.</div>
+    <button class="splash-btn" onclick="goTo('home')">Commencer →</button>
+  </div>
+
+  <!-- ════ HOME ════ -->
+  <div id="home" class="screen">
+    <div class="map-area">
+      <div class="map-grid"></div>
+      <div class="road h r1"></div><div class="road h r2"></div><div class="road h r3"></div>
+      <div class="road v r4"></div><div class="road v r5"></div><div class="road v r6"></div>
+      <div class="moto-dot m1">🛵</div>
+      <div class="moto-dot m2">🛵</div>
+      <div class="moto-dot m3">🛵</div>
+      <div class="user-pin">
+        <div class="pin-icon"><span>📍</span></div>
+        <div class="pin-shadow"></div>
+      </div>
+      <div class="map-topbar">
+        <div class="greeting">
+          <div class="greeting-sub">Bonjour 👋</div>
+          <div class="greeting-name">Où vas-tu, <span>ami ?</span></div>
+        </div>
+        <div class="notif-btn">🔔<div class="notif-badge"></div></div>
+      </div>
+    </div>
+
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="where-card" onclick="goTo('booking')">
+        <div class="where-icon">🔍</div>
+        <div class="where-text">
+          <div class="where-label">Destination</div>
+          <div class="where-placeholder">Où veux-tu aller ?</div>
+        </div>
+        <div class="where-arrow">›</div>
+      </div>
+      <div class="section-title">Accès rapide</div>
+      <div class="quick-actions">
+        <div class="quick-btn" onclick="goTo('booking')"><div class="quick-icon">🏠</div><div class="quick-label">Maison</div></div>
+        <div class="quick-btn" onclick="goTo('booking')"><div class="quick-icon">💼</div><div class="quick-label">Travail</div></div>
+        <div class="quick-btn" onclick="goTo('booking')"><div class="quick-icon">🕌</div><div class="quick-label">Mosquée</div></div>
+        <div class="quick-btn" onclick="goTo('booking')"><div class="quick-icon">🛒</div><div class="quick-label">Marché</div></div>
+      </div>
+      <div class="section-title">Motos disponibles près de toi</div>
+      <div class="nearby-card" onclick="goTo('booking')">
+        <div class="driver-avatar">👨🏾</div>
+        <div class="driver-info">
+          <div class="driver-name">Moussa Diallo</div>
+          <div class="driver-meta"><span class="stars">★★★★★</span> 4.9 · DK-3821</div>
+        </div>
+        <div class="driver-distance">2 min</div>
+      </div>
+      <div class="nearby-card" onclick="goTo('booking')">
+        <div class="driver-avatar">👨🏿</div>
+        <div class="driver-info">
+          <div class="driver-name">Ibrahima Ndiaye</div>
+          <div class="driver-meta"><span class="stars">★★★★☆</span> 4.7 · DK-5513</div>
+        </div>
+        <div class="driver-distance">4 min</div>
+      </div>
+      <div style="height: 80px;"></div>
+    </div>
+
+    <div class="nav-bar">
+      <div class="nav-item active" onclick="navTo('home', this)"><div class="nav-icon">🗺️</div><div class="nav-label">Carte</div></div>
+      <div class="nav-item" onclick="navTo('history', this)"><div class="nav-icon">🕓</div><div class="nav-label">Historique</div></div>
+      <div class="nav-item" onclick=""><div class="nav-icon">💳</div><div class="nav-label">Paiement</div></div>
+      <div class="nav-item" onclick="navTo('profile', this)"><div class="nav-icon">👤</div><div class="nav-label">Profil</div></div>
+    </div>
+  </div>
+
+  <!-- ════ BOOKING ════ -->
+  <div id="booking" class="screen">
+    <div class="booking-header">
+      <div class="back-btn" onclick="goTo('home')">← Retour</div>
+      <div class="booking-title">Choisir ta course</div>
+    </div>
+    <div class="route-card">
+      <div class="route-point">
+        <div class="route-dot start"></div>
+        <input class="route-input" value="📍 Plateau, Dakar" readonly>
+      </div>
+      <div class="route-line-container"><div class="route-line"></div></div>
+      <div class="route-point">
+        <div class="route-dot end"></div>
+        <input class="route-input" value="🏥 Hôpital Principal">
+      </div>
+    </div>
+    <div class="ride-options">
+      <div class="section-title">Options de course</div>
+      <div class="ride-option selected" onclick="selectRide(this)">
+        <div class="ride-emoji">🛵</div>
+        <div class="ride-details">
+          <div class="ride-name">Jakarta Express</div>
+          <div class="ride-desc">1 passager · Rapide</div>
+          <div class="ride-time">⏱ 3 min · 2.1 km</div>
+        </div>
+        <div><div class="ride-price">800 F</div><div class="ride-price-sub">CFA</div></div>
+      </div>
+      <div class="ride-option" onclick="selectRide(this)">
+        <div class="ride-emoji">🏍️</div>
+        <div class="ride-details">
+          <div class="ride-name">Jakarta Confort</div>
+          <div class="ride-desc">Conducteur expérimenté</div>
+          <div class="ride-time">⏱ 5 min · 2.1 km</div>
+        </div>
+        <div><div class="ride-price">1 200 F</div><div class="ride-price-sub">CFA</div></div>
+      </div>
+      <div class="ride-option" onclick="selectRide(this)">
+        <div class="ride-emoji">👑</div>
+        <div class="ride-details">
+          <div class="ride-name">Jakarta Premium</div>
+          <div class="ride-desc">Top chauffeur + casque</div>
+          <div class="ride-time">⏱ 4 min · 2.1 km</div>
+        </div>
+        <div><div class="ride-price">1 800 F</div><div class="ride-price-sub">CFA</div></div>
+      </div>
+      <div style="height: 100px;"></div>
+    </div>
+    <div class="payment-bar">
+      <div class="payment-method">
+        <div class="payment-icon">🟠</div>
+        <div class="payment-name">Orange Money</div>
+        <div style="margin-left:auto; color:var(--muted); font-size:18px">›</div>
+      </div>
+      <button class="book-btn" onclick="goTo('tracking')">Réserver</button>
+    </div>
+  </div>
+
+  <!-- ════ TRACKING ════ -->
+  <div id="tracking" class="screen">
+    <div class="tracking-map">
+      <div class="map-grid"></div>
+      <div class="road h r2"></div><div class="road h r3"></div>
+      <div class="road v r4"></div><div class="road v r5"></div>
+      <div class="route-path"></div>
+      <div class="moving-moto">🛵</div>
+      <div class="dest-pin">📍</div>
+    </div>
+    <div class="tracking-info">
+      <div class="eta-badge">
+        <div class="eta-left">
+          <div class="eta-label">Arrivée estimée</div>
+          <div class="eta-time">3 min</div>
+          <div class="eta-sub">Moussa arrive bientôt</div>
+        </div>
+        <div class="eta-status">
+          <div class="status-dot">En route</div>
+          <div style="color:var(--muted); font-size:12px; margin-top:4px">800 FCFA</div>
+        </div>
+      </div>
+      <div class="driver-card-tracking">
+        <div class="driver-avatar-lg">👨🏾</div>
+        <div class="driver-info-lg">
+          <div class="driver-name-lg">Moussa Diallo</div>
+          <div class="driver-plate">🏍 DK-3821-A</div>
+          <div class="driver-rating"><span class="stars">★★★★★</span> 4.9 · 312 courses</div>
+        </div>
+        <div class="contact-btns">
+          <div class="contact-btn">📞</div>
+          <div class="contact-btn">💬</div>
+        </div>
+      </div>
+      <button class="book-btn" style="width:100%; margin-bottom:12px;" onclick="goTo('rating')">✅ Arrivé — Noter la course</button>
+      <button class="cancel-btn" onclick="goTo('home')">✕ Annuler la course</button>
+    </div>
+  </div>
+
+  <!-- ════ NOTATION ════ -->
+  <div id="rating" class="screen">
+    <div class="rating-checkmark">✓</div>
+    <div class="rating-title">Course terminée !</div>
+    <div class="rating-sub">Plateau → Hôpital Principal · 2.1 km</div>
+
+    <div class="rating-summary">
+      <div class="rating-stat"><div class="rating-stat-val">800</div><div class="rating-stat-label">FCFA</div></div>
+      <div class="rating-stat"><div class="rating-stat-val">8 min</div><div class="rating-stat-label">Durée</div></div>
+      <div class="rating-stat"><div class="rating-stat-val">2.1 km</div><div class="rating-stat-label">Distance</div></div>
+    </div>
+
+    <div class="rating-driver-card">
+      <div class="rating-driver-avatar">👨🏾</div>
+      <div>
+        <div class="rating-driver-name">Moussa Diallo</div>
+        <div class="rating-driver-sub">🏍 DK-3821-A · 312 courses</div>
+      </div>
+    </div>
+
+    <div class="stars-label">Comment était ta course ?</div>
+    <div class="stars-picker">
+      <span class="star-btn" onclick="rateStar(1)">⭐</span>
+      <span class="star-btn" onclick="rateStar(2)">⭐</span>
+      <span class="star-btn" onclick="rateStar(3)">⭐</span>
+      <span class="star-btn" onclick="rateStar(4)">⭐</span>
+      <span class="star-btn" onclick="rateStar(5)">⭐</span>
+    </div>
+
+    <div class="tags-label">Ce que tu as aimé</div>
+    <div class="tags-grid">
+      <div class="tag" onclick="toggleTag(this)">😊 Sympa</div>
+      <div class="tag" onclick="toggleTag(this)">⚡ Rapide</div>
+      <div class="tag" onclick="toggleTag(this)">🪖 Casque fourni</div>
+      <div class="tag" onclick="toggleTag(this)">🛣️ Bon itinéraire</div>
+      <div class="tag" onclick="toggleTag(this)">💬 Discret</div>
+      <div class="tag" onclick="toggleTag(this)">✨ Moto propre</div>
+    </div>
+
+    <textarea class="rating-comment" placeholder="Un commentaire ? (optionnel)"></textarea>
+    <button class="submit-rating-btn" onclick="submitRating()">Envoyer mon avis 🎉</button>
+    <div style="height: 20px;"></div>
+  </div>
+
+  <!-- ════ HISTORIQUE ════ -->
+  <div id="history" class="screen">
+    <div class="history-header">
+      <div class="history-title">Historique</div>
+      <div class="history-tabs">
+        <div class="history-tab active" onclick="switchTab(this, 'all')">Toutes</div>
+        <div class="history-tab" onclick="switchTab(this, 'completed')">Terminées</div>
+        <div class="history-tab" onclick="switchTab(this, 'cancelled')">Annulées</div>
+      </div>
+    </div>
+
+    <div class="history-list" id="historyList">
+      <div class="history-month">Avril 2025</div>
+
+      <div class="history-item" data-status="completed">
+        <div class="history-row1">
+          <div class="history-driver-row">
+            <div class="history-avatar">👨🏾</div>
+            <div>
+              <div class="history-driver-name">Moussa Diallo</div>
+              <div class="history-driver-date">Aujourd'hui, 14h32</div>
+            </div>
+          </div>
+          <div class="history-price">800 F</div>
+        </div>
+        <div class="history-route">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 0;">
+            <div class="history-route-dot s"></div>
+            <div class="history-route-line"></div>
+            <div class="history-route-dot e"></div>
+          </div>
+          <div class="history-route-texts">
+            <div class="history-route-text">Plateau</div>
+            <div class="history-route-text">Hôpital Principal</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+            <div class="history-badge completed">Terminée</div>
+            <div class="history-stars">★★★★★</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="history-item" data-status="completed">
+        <div class="history-row1">
+          <div class="history-driver-row">
+            <div class="history-avatar">👨🏿</div>
+            <div>
+              <div class="history-driver-name">Ibrahima Ndiaye</div>
+              <div class="history-driver-date">Hier, 09h15</div>
+            </div>
+          </div>
+          <div class="history-price">1 200 F</div>
+        </div>
+        <div class="history-route">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 0;">
+            <div class="history-route-dot s"></div>
+            <div class="history-route-line"></div>
+            <div class="history-route-dot e"></div>
+          </div>
+          <div class="history-route-texts">
+            <div class="history-route-text">Médina</div>
+            <div class="history-route-text">Université Cheikh Anta Diop</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+            <div class="history-badge completed">Terminée</div>
+            <div class="history-stars">★★★★☆</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="history-item" data-status="cancelled">
+        <div class="history-row1">
+          <div class="history-driver-row">
+            <div class="history-avatar">👨🏾</div>
+            <div>
+              <div class="history-driver-name">Abdou Sow</div>
+              <div class="history-driver-date">12 Avr, 17h50</div>
+            </div>
+          </div>
+          <div class="history-price" style="color:var(--muted)">— F</div>
+        </div>
+        <div class="history-route">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 0;">
+            <div class="history-route-dot s"></div>
+            <div class="history-route-line"></div>
+            <div class="history-route-dot e"></div>
+          </div>
+          <div class="history-route-texts">
+            <div class="history-route-text">Point E</div>
+            <div class="history-route-text">Marché Sandaga</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;">
+            <div class="history-badge cancelled">Annulée</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="history-month" style="margin-top:16px;">Mars 2025</div>
+
+      <div class="history-item" data-status="completed">
+        <div class="history-row1">
+          <div class="history-driver-row">
+            <div class="history-avatar">🧑🏾</div>
+            <div>
+              <div class="history-driver-name">Fatou Ba</div>
+              <div class="history-driver-date">28 Mars, 08h05</div>
+            </div>
+          </div>
+          <div class="history-price">1 800 F</div>
+        </div>
+        <div class="history-route">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 0;">
+            <div class="history-route-dot s"></div>
+            <div class="history-route-line"></div>
+            <div class="history-route-dot e"></div>
+          </div>
+          <div class="history-route-texts">
+            <div class="history-route-text">Almadies</div>
+            <div class="history-route-text">Aéroport Blaise Diagne</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+            <div class="history-badge completed">Terminée</div>
+            <div class="history-stars">★★★★★</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="history-item" data-status="completed">
+        <div class="history-row1">
+          <div class="history-driver-row">
+            <div class="history-avatar">👨🏾</div>
+            <div>
+              <div class="history-driver-name">Moussa Diallo</div>
+              <div class="history-driver-date">20 Mars, 11h30</div>
+            </div>
+          </div>
+          <div class="history-price">800 F</div>
+        </div>
+        <div class="history-route">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 0;">
+            <div class="history-route-dot s"></div>
+            <div class="history-route-line"></div>
+            <div class="history-route-dot e"></div>
+          </div>
+          <div class="history-route-texts">
+            <div class="history-route-text">HLM</div>
+            <div class="history-route-text">Marché Tilène</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+            <div class="history-badge completed">Terminée</div>
+            <div class="history-stars">★★★★☆</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-bar">
+      <div class="nav-item" onclick="navTo('home', this)"><div class="nav-icon">🗺️</div><div class="nav-label">Carte</div></div>
+      <div class="nav-item active" onclick="navTo('history', this)"><div class="nav-icon">🕓</div><div class="nav-label" style="color:var(--saffron)">Historique</div></div>
+      <div class="nav-item"><div class="nav-icon">💳</div><div class="nav-label">Paiement</div></div>
+      <div class="nav-item" onclick="navTo('profile', this)"><div class="nav-icon">👤</div><div class="nav-label">Profil</div></div>
+    </div>
+  </div>
+
+  <!-- ════ PROFIL ════ -->
+  <div id="profile" class="screen">
+    <div class="profile-header">
+      <div class="profile-top">
+        <div class="profile-avatar">
+          👤
+          <div class="profile-edit-badge">✏️</div>
+        </div>
+        <div class="profile-info">
+          <div class="profile-name">Amadou Mbaye</div>
+          <div class="profile-phone">+221 77 432 89 10</div>
+          <div class="profile-badge">⭐ Membre Gold</div>
+        </div>
+      </div>
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <div class="profile-stat-val">47</div>
+          <div class="profile-stat-label">Courses</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-val">4.8</div>
+          <div class="profile-stat-label">Ma note</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-val">38k</div>
+          <div class="profile-stat-label">FCFA dépensés</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-body">
+      <div class="profile-section-title">Mon compte</div>
+
+      <div class="profile-menu-item">
+        <div class="profile-menu-icon icon-orange">🪙</div>
+        <div class="profile-menu-text">
+          <div class="profile-menu-label">Portefeuille</div>
+          <div class="profile-menu-sub">Solde : 5 200 FCFA</div>
+        </div>
+        <div class="profile-menu-arrow">›</div>
+      </div>
+
+      <div class="profile-menu-item">
+        <div class="profile-menu-icon icon-blue">💳</div>
+        <div class="profile-menu-text">
+          <div class="profile-menu-label">Moyens de paiement</div>
+          <div class="profile-menu-sub">Orange Money · Wave</div>
+        </div>
+        <div class="profile-menu-arrow">›</div>
+      </div>
+
+      <div class="profile-menu-item">
+        <div class="profile-menu-icon icon-green">🎁</div>
+        <div class="profile-menu-text">
+          <div class="profile-menu-label">Mes promotions</div>
+          <div class="profile-menu-sub">2 codes actifs</div>
+        </div>
+        <div class="profile-menu-badge">2</div>
+        <div class="profile-menu-arrow" style="margin-left:8px;">›</div>
+      </div>
+
+      <div class="profile-section-title">Sécurité</div>
+
+      <div class="profile-menu-item">
+        <div class="profile-menu-icon icon-orange">🔔</div>
+        <div class="profile-menu-text">
+          <div class="profile-menu-label">Notifications</div>
+          <div class="profile-menu-sub">Activées</div>
+        </div>
+        <div class="profile-menu-arrow">›</div>
+      </div>
+
+      <div class="profile-menu-item">
+        <div class="profile-menu-icon icon-purple">🛡️</div>
+        <div class="profile-menu-text">
+          <div class="profile-menu-label">Confidentialité</div>
+          <div class="profile-menu-sub">Gérer mes données</div>
+        </div>
+        <div class="profile-menu-arrow">›</div>
+      </div>
+
+      <div class="profile-section-title">Support</div>
+
+      <div class="profile-menu-item">
+        <div class="profile-menu-icon icon-blue">💬</div>
+        <div class="profile-menu-text">
+          <div class="profile-menu-label">Aide & Contact</div>
+          <div class="profile-menu-sub">Chat, WhatsApp, appel</div>
+        </div>
+        <div class="profile-menu-arrow">›</div>
+      </div>
+
+      <div class="profile-menu-item">
+        <div class="profile-menu-icon icon-red">⚠️</div>
+        <div class="profile-menu-text">
+          <div class="profile-menu-label">Signaler un problème</div>
+          <div class="profile-menu-sub">Course ou conducteur</div>
+        </div>
+        <div class="profile-menu-arrow">›</div>
+      </div>
+
+      <button class="logout-btn">Se déconnecter</button>
+      <div style="height:20px;"></div>
+    </div>
+
+    <div class="nav-bar">
+      <div class="nav-item" onclick="navTo('home', this)"><div class="nav-icon">🗺️</div><div class="nav-label">Carte</div></div>
+      <div class="nav-item" onclick="navTo('history', this)"><div class="nav-icon">🕓</div><div class="nav-label">Historique</div></div>
+      <div class="nav-item"><div class="nav-icon">💳</div><div class="nav-label">Paiement</div></div>
+      <div class="nav-item active" onclick="navTo('profile', this)"><div class="nav-icon">👤</div><div class="nav-label" style="color:var(--saffron)">Profil</div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentScreen = 'splash';
+
+  function goTo(id) {
+    const prev = document.getElementById(currentScreen);
+    if (prev) prev.classList.add('slide-left');
+    setTimeout(() => {
+      document.querySelectorAll('.screen').forEach(s => {
+        s.classList.remove('active', 'slide-left');
+      });
+      document.getElementById(id).classList.add('active');
+    }, 50);
+    currentScreen = id;
+  }
+
+  function navTo(id, navItem) {
+    goTo(id);
+    // Update nav items in the current screen
+    const navBars = document.querySelectorAll('.nav-bar');
+    navBars.forEach(bar => {
+      bar.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    });
+  }
+
+  function selectRide(el) {
+    document.querySelectorAll('.ride-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  function rateStar(n) {
+    const stars = document.querySelectorAll('.star-btn');
+    stars.forEach((s, i) => {
+      s.classList.toggle('active', i < n);
+    });
+  }
+
+  function toggleTag(el) {
+    el.classList.toggle('active');
+  }
+
+  function submitRating() {
+    const btn = document.querySelector('.submit-rating-btn');
+    btn.textContent = '✓ Avis envoyé !';
+    btn.style.background = 'linear-gradient(135deg, var(--green), #27ae60)';
+    setTimeout(() => goTo('home'), 1200);
+  }
+
+  function switchTab(tabEl, filter) {
+    document.querySelectorAll('.history-tab').forEach(t => t.classList.remove('active'));
+    tabEl.classList.add('active');
+    const items = document.querySelectorAll('.history-item');
+    items.forEach(item => {
+      if (filter === 'all') {
+        item.style.display = '';
+      } else {
+        item.style.display = item.dataset.status === filter ? '' : 'none';
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
