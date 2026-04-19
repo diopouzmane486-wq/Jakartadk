@@ -1221,17 +1221,13 @@
   <div id="login" class="screen active">
     <div class="auth-logo">🛵</div>
     <div class="auth-title">Jakarta<span>DK</span></div>
-    <div class="auth-sub">Entre ton numéro de téléphone pour commencer ta course</div>
+    <div class="auth-sub">Entre ton email pour commencer ta course</div>
 
     <div class="auth-form">
-      <div class="phone-input-group">
-        <div class="country-code">🇸🇳 +221</div>
-        <input class="auth-input" id="phoneInput" type="tel"
-          placeholder="77 123 45 67" maxlength="9"
-          oninput="formatPhone(this)">
-      </div>
+      <input class="auth-input" id="emailInput" type="email"
+        placeholder="ton@email.com" style="margin-bottom:14px;">
       <button class="auth-btn" id="sendOtpBtn" onclick="sendOTP()">
-        Recevoir le code SMS →
+        Recevoir le code par email →
       </button>
       <div class="auth-note">
         En continuant, tu acceptes les <span>conditions d'utilisation</span><br>
@@ -1244,7 +1240,7 @@
   <div id="otp" class="screen">
     <div class="auth-logo">💬</div>
     <div class="auth-title">Code de vérification</div>
-    <div class="auth-sub" id="otpSubtext">Nous avons envoyé un SMS au +221 XX XXX XX XX</div>
+    <div class="auth-sub" id="otpSubtext">Nous avons envoyé un code à ton email</div>
 
     <div class="otp-group">
       <input class="otp-input" id="otp1" type="number" maxlength="1" oninput="otpMove(this, null, 'otp2')">
@@ -1849,32 +1845,32 @@
 
   // ── Envoyer OTP ──
   async function sendOTP() {
-    const phone = document.getElementById('phoneInput').value.replace(/\s/g, '');
-    if (phone.length < 9) {
-      showToast('Entre un numéro valide à 9 chiffres', 'error');
+    const email = document.getElementById('emailInput').value.trim();
+    if (!email || !email.includes('@')) {
+      showToast('Entre un email valide', 'error');
       return;
     }
-    currentPhone = '+221' + phone;
+    currentPhone = email;
     const btn = document.getElementById('sendOtpBtn');
     btn.disabled = true;
     btn.innerHTML = '<div class="spinner"></div> Envoi en cours...';
 
     try {
       const { error } = await sb.auth.signInWithOtp({
-        phone: currentPhone
+        email: email
       });
       if (error) throw error;
 
       document.getElementById('otpSubtext').textContent =
-        'Nous avons envoyé un SMS au ' + currentPhone;
+        'Nous avons envoyé un code à ' + email;
       goTo('otp');
       startCountdown();
-      showToast('✓ SMS envoyé !', 'success');
+      showToast('✓ Email envoyé !', 'success');
     } catch (err) {
       showToast('Erreur : ' + (err.message || 'Réessaie'), 'error');
     } finally {
       btn.disabled = false;
-      btn.innerHTML = 'Recevoir le code SMS →';
+      btn.innerHTML = 'Recevoir le code par email →';
     }
   }
 
@@ -1907,9 +1903,9 @@
 
     try {
       const { data, error } = await sb.auth.verifyOtp({
-        phone: currentPhone,
+        email: currentPhone,
         token: code,
-        type: 'sms'
+        type: 'email'
       });
       if (error) throw error;
 
@@ -1989,8 +1985,8 @@
   }
 
   async function sendOTPSilent() {
-    await sb.auth.signInWithOtp({ phone: currentPhone });
-    showToast('✓ Nouveau SMS envoyé !', 'success');
+    await sb.auth.signInWithOtp({ email: currentPhone });
+    showToast('✓ Nouveau email envoyé !', 'success');
   }
 
   // ── Vérifier session au démarrage ──
