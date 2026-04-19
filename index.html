@@ -1991,9 +1991,41 @@
 
   // ── Vérifier session au démarrage ──
   window.addEventListener('load', async () => {
+    // Détecter Magic Link dans l'URL
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = hashParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token');
+
+    if (accessToken) {
+      try {
+        const { data, error } = await sb.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
+        });
+        if (!error && data.session) {
+          // Nettoyer l'URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+          showToast('✓ Connecté !', 'success');
+          setTimeout(() => goTo('splash'), 800);
+          return;
+        }
+      } catch (err) {
+        console.log('Erreur magic link:', err);
+      }
+    }
+
+    // Vérifier session existante
     const { data: { session } } = await sb.auth.getSession();
     if (session) {
       goTo('splash');
+    }
+  });
+
+  // Écouter les changements d'auth
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      showToast('✓ Connecté !', 'success');
+      setTimeout(() => goTo('splash'), 800);
     }
   });
 
