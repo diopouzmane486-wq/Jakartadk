@@ -2,8 +2,40 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Jakarta Dakar</title>
+
+<!-- ═══ PWA META ═══ -->
+<meta name="application-name" content="JakartaDK">
+<meta name="description" content="Tes motos-taxis à Dakar, en un seul tap. Rapide, sûr, abordable.">
+<meta name="theme-color" content="#F5A623">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="JakartaDK">
+<meta name="msapplication-TileColor" content="#F5A623">
+<meta name="msapplication-TileImage" content="icons/icon-144.png">
+
+<!-- ═══ MANIFEST ═══ -->
+<link rel="manifest" href="manifest.json">
+
+<!-- ═══ ICÔNES APPLE ═══ -->
+<link rel="apple-touch-icon" sizes="72x72"  href="icons/icon-72.png">
+<link rel="apple-touch-icon" sizes="96x96"  href="icons/icon-96.png">
+<link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
+<link rel="apple-touch-icon" sizes="144x144" href="icons/icon-144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
+<link rel="shortcut icon" href="icons/icon-192.png">
+
+<!-- ═══ OPEN GRAPH ═══ -->
+<meta property="og:title" content="Jakarta Dakar">
+<meta property="og:description" content="Tes motos-taxis à Dakar, en un seul tap.">
+<meta property="og:image" content="icons/icon-512.png">
+<meta property="og:type" content="website">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -969,14 +1001,296 @@
   .m3 { top: 20%; left: 70%; animation-delay: 2s; }
 
   .stars { color: #FFD700; font-size: 13px; letter-spacing: 1px; }
+
+  /* ─── BANNIÈRE INSTALLATION PWA ─── */
+  #installBanner {
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 360px;
+    background: var(--card);
+    border: 1px solid rgba(245,166,35,0.4);
+    border-radius: 20px;
+    padding: 14px 18px;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+    animation: slideInBanner 0.5s cubic-bezier(0.175,0.885,0.32,1.275) both;
+  }
+  @keyframes slideInBanner {
+    from { transform: translateX(-50%) translateY(80px); opacity: 0; }
+    to   { transform: translateX(-50%) translateY(0);   opacity: 1; }
+  }
+  .banner-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--saffron), var(--accent));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .banner-text { flex: 1; }
+  .banner-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); }
+  .banner-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .banner-btns { display: flex; gap: 8px; flex-shrink: 0; }
+  .banner-install {
+    background: linear-gradient(135deg, var(--saffron), var(--accent));
+    color: white; border: none;
+    padding: 8px 16px; border-radius: 10px;
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; white-space: nowrap;
+  }
+  .banner-dismiss {
+    background: none; border: none;
+    color: var(--muted); font-size: 20px;
+    cursor: pointer; padding: 4px; line-height: 1;
+  }
+
+  /* ─── AUTH SCREENS ─── */
+  #login, #otp, #onboarding {
+    background: var(--deep);
+    display: flex; flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    overflow-y: auto;
+  }
+
+  .auth-logo {
+    width: 72px; height: 72px;
+    background: linear-gradient(135deg, var(--saffron), var(--accent));
+    border-radius: 22px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 34px;
+    box-shadow: 0 12px 40px rgba(245,166,35,0.4);
+    margin-bottom: 24px;
+    animation: logoPulse 2.5s ease infinite;
+  }
+  .auth-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px; font-weight: 800;
+    color: var(--text); margin-bottom: 8px;
+    text-align: center;
+  }
+  .auth-title span { color: var(--saffron); }
+  .auth-sub {
+    color: var(--muted); font-size: 14px;
+    text-align: center; line-height: 1.6;
+    margin-bottom: 36px; max-width: 280px;
+  }
+  .auth-form { width: 100%; }
+
+  .phone-input-group {
+    display: flex; gap: 10px; margin-bottom: 14px;
+  }
+  .country-code {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 14px;
+    color: var(--text); font-size: 15px; font-weight: 600;
+    display: flex; align-items: center; gap: 6px;
+    flex-shrink: 0; cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .country-code:hover { border-color: var(--saffron); }
+  .auth-input {
+    flex: 1;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px; font-weight: 500;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .auth-input:focus { border-color: var(--saffron); }
+  .auth-input::placeholder { color: var(--muted); }
+
+  .auth-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--saffron), var(--accent));
+    color: white; border: none;
+    padding: 17px; border-radius: 16px;
+    font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700;
+    cursor: pointer; margin-top: 8px;
+    box-shadow: 0 8px 24px rgba(245,166,35,0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(245,166,35,0.5); }
+  .auth-btn:active { transform: scale(0.97); }
+  .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .auth-divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 20px 0; width: 100%;
+  }
+  .auth-divider-line { flex: 1; height: 1px; background: var(--border); }
+  .auth-divider-text { color: var(--muted); font-size: 12px; }
+
+  .auth-note {
+    color: var(--muted); font-size: 12px;
+    text-align: center; margin-top: 16px;
+    line-height: 1.5;
+  }
+  .auth-note span { color: var(--saffron); }
+
+  /* OTP input */
+  .otp-group {
+    display: flex; gap: 10px; justify-content: center;
+    margin-bottom: 24px; width: 100%;
+  }
+  .otp-input {
+    width: 52px; height: 60px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    text-align: center;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 22px; font-weight: 800;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .otp-input:focus { border-color: var(--saffron); }
+
+  .resend-btn {
+    background: none; border: none;
+    color: var(--saffron); font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer; text-decoration: underline;
+    margin-top: 8px;
+  }
+  .countdown { color: var(--muted); font-size: 14px; margin-top: 8px; }
+
+  /* Onboarding */
+  .onboarding-fields { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+  .field-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700;
+    color: var(--muted); margin-bottom: 4px;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  /* Toast notification */
+  .toast {
+    position: fixed;
+    bottom: 100px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 20px;
+    color: var(--text); font-size: 14px;
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .toast.success { border-color: var(--green); color: var(--green); }
+  .toast.error { border-color: var(--red); color: var(--red); }
+
+  /* Loading spinner */
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
 <div class="phone">
 
+
+  <!-- ════ LOGIN ════ -->
+  <div id="login" class="screen active">
+    <div class="auth-logo">🛵</div>
+    <div class="auth-title">Jakarta<span>DK</span></div>
+    <div class="auth-sub">Entre ton numéro de téléphone pour commencer ta course</div>
+
+    <div class="auth-form">
+      <div class="phone-input-group">
+        <div class="country-code">🇸🇳 +221</div>
+        <input class="auth-input" id="phoneInput" type="tel"
+          placeholder="77 123 45 67" maxlength="9"
+          oninput="formatPhone(this)">
+      </div>
+      <button class="auth-btn" id="sendOtpBtn" onclick="sendOTP()">
+        Recevoir le code SMS →
+      </button>
+      <div class="auth-note">
+        En continuant, tu acceptes les <span>conditions d'utilisation</span><br>
+        de Jakarta Dakar
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ OTP ════ -->
+  <div id="otp" class="screen">
+    <div class="auth-logo">💬</div>
+    <div class="auth-title">Code de vérification</div>
+    <div class="auth-sub" id="otpSubtext">Nous avons envoyé un SMS au +221 XX XXX XX XX</div>
+
+    <div class="otp-group">
+      <input class="otp-input" id="otp1" type="number" maxlength="1" oninput="otpMove(this, null, 'otp2')">
+      <input class="otp-input" id="otp2" type="number" maxlength="1" oninput="otpMove(this, 'otp1', 'otp3')">
+      <input class="otp-input" id="otp3" type="number" maxlength="1" oninput="otpMove(this, 'otp2', 'otp4')">
+      <input class="otp-input" id="otp4" type="number" maxlength="1" oninput="otpMove(this, 'otp3', 'otp5')">
+      <input class="otp-input" id="otp5" type="number" maxlength="1" oninput="otpMove(this, 'otp4', 'otp6')">
+      <input class="otp-input" id="otp6" type="number" maxlength="1" oninput="otpMove(this, 'otp5', null)">
+    </div>
+
+    <button class="auth-btn" id="verifyOtpBtn" onclick="verifyOTP()">
+      Vérifier le code ✓
+    </button>
+
+    <div class="countdown" id="countdown">Renvoyer le code dans <span id="timer">60</span>s</div>
+    <button class="resend-btn" id="resendBtn" style="display:none" onclick="resendOTP()">
+      Renvoyer le code SMS
+    </button>
+    <button style="background:none;border:none;color:var(--muted);font-size:13px;margin-top:16px;cursor:pointer;" onclick="goTo('login')">
+      ← Changer de numéro
+    </button>
+  </div>
+
+  <!-- ════ ONBOARDING ════ -->
+  <div id="onboarding" class="screen">
+    <div class="auth-logo">👤</div>
+    <div class="auth-title">Ton profil</div>
+    <div class="auth-sub">Dis-nous comment t'appeler !</div>
+
+    <div class="onboarding-fields">
+      <div>
+        <div class="field-label">Prénom</div>
+        <input class="auth-input" id="firstNameInput" type="text" placeholder="Ex: Amadou">
+      </div>
+      <div>
+        <div class="field-label">Nom</div>
+        <input class="auth-input" id="lastNameInput" type="text" placeholder="Ex: Mbaye">
+      </div>
+      <button class="auth-btn" style="margin-top:8px;" onclick="saveProfile()">
+        C'est parti ! 🚀
+      </button>
+    </div>
+  </div>
+
   <!-- ════ SPLASH ════ -->
-  <div id="splash" class="screen active">
+  <div id="splash" class="screen">
     <div class="splash-logo">🛵</div>
     <div>
       <div class="splash-title">Jakarta<span>DK</span></div>
@@ -1470,32 +1784,224 @@
     </div>
   </div>
 
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ════ BANNIÈRE INSTALL PWA ════ -->
+  <div id="installBanner">
+    <div class="banner-icon">🛵</div>
+    <div class="banner-text">
+      <div class="banner-title">Installer Jakarta Dakar</div>
+      <div class="banner-sub">Ajouter à ton écran d'accueil</div>
+    </div>
+    <div class="banner-btns">
+      <button class="banner-install" onclick="installPWA()">Installer</button>
+      <button class="banner-dismiss" onclick="dismissBanner()">×</button>
+    </div>
+  </div>
+
 </div>
 
-<script>
-  let currentScreen = 'splash';
 
+
+
+<!-- ═══ SUPABASE + AUTH + APP ═══ -->
+<script>
+  // ── Supabase init ──
+  const SUPABASE_URL = 'https://vsnuhpivreyqkgxqirqy.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_BnA4_r1s6_yIdkBNeK2YcQ_ojA1jlIW';
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let currentPhone = '';
+  let countdownInterval;
+  let currentScreen = 'login';
+
+  // ── Toast ──
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + type;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── Navigation ──
   function goTo(id) {
-    const prev = document.getElementById(currentScreen);
-    if (prev) prev.classList.add('slide-left');
-    setTimeout(() => {
-      document.querySelectorAll('.screen').forEach(s => {
-        s.classList.remove('active', 'slide-left');
-      });
-      document.getElementById(id).classList.add('active');
-    }, 50);
+    document.querySelectorAll('.screen').forEach(s => {
+      s.classList.remove('active', 'slide-left');
+    });
+    document.getElementById(id).classList.add('active');
     currentScreen = id;
   }
 
   function navTo(id, navItem) {
     goTo(id);
-    // Update nav items in the current screen
-    const navBars = document.querySelectorAll('.nav-bar');
-    navBars.forEach(bar => {
-      bar.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    });
   }
 
+  // ── Format téléphone ──
+  function formatPhone(input) {
+    let val = input.value.replace(/\D/g, '');
+    if (val.length > 9) val = val.slice(0, 9);
+    input.value = val;
+  }
+
+  // ── Envoyer OTP ──
+  async function sendOTP() {
+    const phone = document.getElementById('phoneInput').value.replace(/\s/g, '');
+    if (phone.length < 9) {
+      showToast('Entre un numéro valide à 9 chiffres', 'error');
+      return;
+    }
+    currentPhone = '+221' + phone;
+    const btn = document.getElementById('sendOtpBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Envoi en cours...';
+
+    try {
+      const { error } = await sb.auth.signInWithOtp({
+        phone: currentPhone
+      });
+      if (error) throw error;
+
+      document.getElementById('otpSubtext').textContent =
+        'Nous avons envoyé un SMS au ' + currentPhone;
+      goTo('otp');
+      startCountdown();
+      showToast('✓ SMS envoyé !', 'success');
+    } catch (err) {
+      showToast('Erreur : ' + (err.message || 'Réessaie'), 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Recevoir le code SMS →';
+    }
+  }
+
+  // ── OTP navigation ──
+  function otpMove(current, prevId, nextId) {
+    const val = current.value;
+    if (val.length > 1) current.value = val.slice(-1);
+    if (val && nextId) document.getElementById(nextId).focus();
+    if (!val && prevId) document.getElementById(prevId).focus();
+    // Auto-verify when all filled
+    const code = getOTPCode();
+    if (code.length === 6) verifyOTP();
+  }
+
+  function getOTPCode() {
+    return ['otp1','otp2','otp3','otp4','otp5','otp6']
+      .map(id => document.getElementById(id).value).join('');
+  }
+
+  // ── Vérifier OTP ──
+  async function verifyOTP() {
+    const code = getOTPCode();
+    if (code.length < 6) {
+      showToast('Entre les 6 chiffres du code', 'error');
+      return;
+    }
+    const btn = document.getElementById('verifyOtpBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Vérification...';
+
+    try {
+      const { data, error } = await sb.auth.verifyOtp({
+        phone: currentPhone,
+        token: code,
+        type: 'sms'
+      });
+      if (error) throw error;
+
+      // Vérifier si profil existe
+      const { data: profile } = await sb.from('profiles')
+        .select('*').eq('id', data.user.id).single();
+
+      if (profile && profile.first_name) {
+        showToast('✓ Bienvenue ' + profile.first_name + ' !', 'success');
+        setTimeout(() => goTo('splash'), 800);
+      } else {
+        goTo('onboarding');
+      }
+    } catch (err) {
+      showToast('Code incorrect, réessaie', 'error');
+      ['otp1','otp2','otp3','otp4','otp5','otp6'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('otp1').focus();
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Vérifier le code ✓';
+    }
+  }
+
+  // ── Sauvegarder profil ──
+  async function saveProfile() {
+    const firstName = document.getElementById('firstNameInput').value.trim();
+    const lastName = document.getElementById('lastNameInput').value.trim();
+    if (!firstName) {
+      showToast('Entre ton prénom', 'error');
+      return;
+    }
+    const btn = document.querySelector('#onboarding .auth-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Sauvegarde...';
+
+    try {
+      const { data: { user } } = await sb.auth.getUser();
+      await sb.from('profiles').upsert({
+        id: user.id,
+        phone: currentPhone,
+        first_name: firstName,
+        last_name: lastName,
+        created_at: new Date().toISOString()
+      });
+      showToast('✓ Profil créé !', 'success');
+      setTimeout(() => goTo('splash'), 800);
+    } catch (err) {
+      showToast('Erreur, réessaie', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = "C'est parti ! 🚀";
+    }
+  }
+
+  // ── Countdown ──
+  function startCountdown() {
+    let seconds = 60;
+    clearInterval(countdownInterval);
+    document.getElementById('countdown').style.display = 'block';
+    document.getElementById('resendBtn').style.display = 'none';
+    countdownInterval = setInterval(() => {
+      seconds--;
+      document.getElementById('timer').textContent = seconds;
+      if (seconds <= 0) {
+        clearInterval(countdownInterval);
+        document.getElementById('countdown').style.display = 'none';
+        document.getElementById('resendBtn').style.display = 'block';
+      }
+    }, 1000);
+  }
+
+  function resendOTP() {
+    sendOTPSilent();
+    startCountdown();
+  }
+
+  async function sendOTPSilent() {
+    await sb.auth.signInWithOtp({ phone: currentPhone });
+    showToast('✓ Nouveau SMS envoyé !', 'success');
+  }
+
+  // ── Vérifier session au démarrage ──
+  window.addEventListener('load', async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      goTo('splash');
+    }
+  });
+
+  // ── App functions ──
   function selectRide(el) {
     document.querySelectorAll('.ride-option').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
@@ -1503,14 +2009,10 @@
 
   function rateStar(n) {
     const stars = document.querySelectorAll('.star-btn');
-    stars.forEach((s, i) => {
-      s.classList.toggle('active', i < n);
-    });
+    stars.forEach((s, i) => s.classList.toggle('active', i < n));
   }
 
-  function toggleTag(el) {
-    el.classList.toggle('active');
-  }
+  function toggleTag(el) { el.classList.toggle('active'); }
 
   function submitRating() {
     const btn = document.querySelector('.submit-rating-btn');
@@ -1522,16 +2024,41 @@
   function switchTab(tabEl, filter) {
     document.querySelectorAll('.history-tab').forEach(t => t.classList.remove('active'));
     tabEl.classList.add('active');
-    const items = document.querySelectorAll('.history-item');
-    items.forEach(item => {
-      if (filter === 'all') {
-        item.style.display = '';
-      } else {
-        item.style.display = item.dataset.status === filter ? '' : 'none';
-      }
+    document.querySelectorAll('.history-item').forEach(item => {
+      item.style.display = (filter === 'all' || item.dataset.status === filter) ? '' : 'none';
+    });
+  }
+
+  // ── PWA install ──
+  let deferredPrompt;
+  const installBanner = document.getElementById('installBanner');
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (installBanner) installBanner.style.display = 'flex';
+  });
+  function installPWA() {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      if (installBanner) installBanner.style.display = 'none';
+    });
+  }
+  function dismissBanner() {
+    if (installBanner) installBanner.style.display = 'none';
+  }
+
+  // ── Service Worker ──
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('[JakartaDK] SW actif ✓'))
+        .catch(err => console.warn('[JakartaDK] SW erreur:', err));
     });
   }
 </script>
+
 
 </body>
 </html>
